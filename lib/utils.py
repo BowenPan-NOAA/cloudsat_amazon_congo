@@ -24,3 +24,66 @@ def slide_max(array,window):
         idx = gap_length+i
         copy[idx] = np.nanmax(array[idx-gap_length:idx+gap_length+1])
     return(copy)
+
+def cal_start_end_julian_days(month,yr):
+####################################################################################################
+#this function determin the starting and ending Jdate for the month 
+    #leap year 
+    msdate0=[1,32,61,92,122,153,183,214,245,275,306,336] 
+    #perpetual year 
+    msdate1=[1,32,60,91,121,152,182,213,244,274,305,335] 
+    if (yr % 4) == 0:  
+        if (yr % 100) == 0: 
+            if (yr % 400) == 0:
+                jdate0=msdate0[month]
+                if month<11:
+                    jdate1=msdate0[month+1]-1
+                else:
+                    jdate1=366
+            else:
+                jdate0=msdate1[month]
+                if month<11:
+                    jdate1=msdate1[month+1]-1
+                else:
+                    jdate1=365
+        else:
+            jdate0=msdate0[month]
+            if month<11:
+                jdate1=msdate0[month+1]-1
+            else:
+                jdate1=366
+    else:
+        jdate0=msdate1[month]
+        if month<11:
+            jdate1=msdate1[month+1]-1
+        else:
+            jdate1=365
+    return(jdate0,jdate1)
+
+def find_nearest(array, value):
+####################################################################################################
+# find_nearest:
+#     Find the nearest index of value to the array
+# Input: 
+#     array - a array
+#     value - the value where the value is located in array
+# Return:
+#     idx - index within the array
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
+
+def group_consecutives(vals, step=1):
+    #find out the continous numbers
+    #"""Return list of consecutive lists of numbers from vals (number list)."""
+    run = []
+    result = [run]
+    expect = None
+    for v in vals:
+        if (v == expect) or (expect is None):
+            run.append(v)
+        else:
+            run = [v]
+            result.append(run)
+        expect = v + step
+    return result

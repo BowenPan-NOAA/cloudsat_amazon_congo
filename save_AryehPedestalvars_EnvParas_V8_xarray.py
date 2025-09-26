@@ -20,73 +20,9 @@ from metpy.calc import vapor_pressure,dewpoint
 from metpy.units import units
 import os
 
-from lib.utils import gunzip, slide_max
+from lib.utils import gunzip, slide_max, cal_start_end_julian_days, find_nearest, group_consecutives
 from lib.define_pedestal import define_cluster, def_cutoff
 
-def group_consecutives(vals, step=1):
-    #find out the continous numbers
-    #"""Return list of consecutive lists of numbers from vals (number list)."""
-    run = []
-    result = [run]
-    expect = None
-    for v in vals:
-        if (v == expect) or (expect is None):
-            run.append(v)
-        else:
-            run = [v]
-            result.append(run)
-        expect = v + step
-    return result
-
-
-
-def Month_jdate(month,yr):
-####################################################################################################
-#this function determin the starting and ending Jdate for the month 
-    #leap year 
-    msdate0=[1,32,61,92,122,153,183,214,245,275,306,336] 
-    #perpetual year 
-    msdate1=[1,32,60,91,121,152,182,213,244,274,305,335] 
-    if (yr % 4) == 0:  
-        if (yr % 100) == 0: 
-            if (yr % 400) == 0:
-                jdate0=msdate0[month]
-                if month<11:
-                    jdate1=msdate0[month+1]-1
-                else:
-                    jdate1=366
-            else:
-                jdate0=msdate1[month]
-                if month<11:
-                    jdate1=msdate1[month+1]-1
-                else:
-                    jdate1=365
-        else:
-            jdate0=msdate0[month]
-            if month<11:
-                jdate1=msdate0[month+1]-1
-            else:
-                jdate1=366
-    else:
-        jdate0=msdate1[month]
-        if month<11:
-            jdate1=msdate1[month+1]-1
-        else:
-            jdate1=365
-    return(jdate0,jdate1)
-
-def find_nearest(array, value):
-####################################################################################################
-# find_nearest:
-#     Find the nearest index of value to the array
-# Input: 
-#     array - a array
-#     value - the value where the value is located in array
-# Return:
-#     idx - index within the array
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return idx
 
 def add_ENV_csv(fileloc,jdate,gnu,stid,UTCtime,Time,lon,lat,meanflag,flag,cape,cin,lcl,SensFlux,
                 LantFlux,MSLP,SST, Omega, lowVWS, midVWS, upVWS, ttlVWS,lowVWS_dir, midVWS_dir,
@@ -288,7 +224,7 @@ for yr in range(2006,2007):
         tmpm = Months[imonth]
         tmpa = Acry[imonth]
         Path_to_juliet = Path_to_nc+'/global_convective_vars_'+str(yr)
-        sday,eday = Month_jdate(imonth,yr)
+        sday,eday = cal_start_end_julian_days(imonth,yr)
         cldbase= np.empty([ntime,721,1440])
         CAPE   = np.empty([ntime,721,1440])
         LCL    = np.empty([ntime,721,1440])
